@@ -1,0 +1,15 @@
+# dependencies
+/node_modules
+
+# Next.js build output
+/.next/
+/out/
+
+# environment variables (real credentials stay on your machine)
+.env*.local
+.env
+
+# logs and OS files
+npm-debug.log*
+.DS_Store
+Thumbs.db
