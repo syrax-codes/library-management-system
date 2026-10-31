@@ -216,5 +216,76 @@ DELIMITER ;
 
 -- ============================================================================
 -- SECTION B: Facilities, Accounts and Analytics (Alisha)
--- (added in a later patch)
 -- ============================================================================
+
+-- ---- Procedure: room booking ---------------------------------------------------
+
+DROP PROCEDURE IF EXISTS sp_ReserveRoom;
+DELIMITER $$
+-- Books a study room slot inside a transaction.
+-- The conflicting reservation may not exist yet, so there is no reservation
+-- row to lock. Instead we lock the parent Study_Rooms row: two sessions
+-- booking the same room are serialized, while other rooms stay free.
+CREATE PROCEDURE sp_ReserveRoom(
+  IN p_member_id INT,
+  IN p_room_id   INT,
+  IN p_date      DATE,
+  IN p_start     TIME,
+  IN p_end       TIME,
+  OUT p_reservation_id INT
+)
+BEGIN
+  DECLARE v_room     INT DEFAULT NULL;
+  DECLARE v_conflict INT DEFAULT 0;
+
+  DECLARE EXIT HANDLER FOR SQLEXCEPTION
+  BEGIN
+    ROLLBACK;
+    RESIGNAL;
+  END;
+
+  -- Simple input rules (no locking needed)
+  IF p_end <= p_start THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'End time must be after start time';
+  END IF;
+  IF p_start < '08:00:00' OR p_end > '20:00:00' THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Rooms can only be booked between 08:00 and 20:00';
+  END IF;
+  IF p_date < CURDATE() THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Cannot book a date in the past';
+  END IF;
+
+  START TRANSACTION;
+
+  -- 1. Lock the room row; other bookings for this room wait here
+  SELECT RoomID INTO v_room
+  FROM Study_Rooms
+  WHERE RoomID = p_room_id
+  FOR UPDATE;
+
+  IF v_room IS NULL THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Room does not exist';
+  END IF;
+
+  -- 2. Two slots overlap when each starts before the other ends
+  SELECT COUNT(*) INTO v_conflict
+  FROM Room_Reservations
+  WHERE RoomID = p_room_id
+    AND ReservationDate = p_date
+    AND BookingStatus = 'Confirmed'
+    AND StartTime < p_end
+    AND EndTime > p_start;
+
+  IF v_conflict > 0 THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Room is already booked for part of that time';
+  END IF;
+
+  -- 3. Insert the booking
+  INSERT INTO Room_Reservations (MemberID, RoomID, ReservationDate, StartTime, EndTime, BookingStatus)
+  VALUES (p_member_id, p_room_id, p_date, p_start, p_end, 'Confirmed');
+
+  SET p_reservation_id = LAST_INSERT_ID();
+
+  COMMIT;
+END$$
+DELIMITER ;
