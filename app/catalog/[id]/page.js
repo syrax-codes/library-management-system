@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { use, useCallback, useEffect, useState } from 'react';
 import { Badge, Card, PageHeader, Table } from '@/components/ui';
+import { AlsoBorrowed } from '@/components/Recommendations';
 import { DigitalFiles, BookReviews } from '@/components/BookExtras';
 import { useUser } from '@/components/AppShell';
 import { useToast } from '@/components/Toast';
@@ -86,6 +87,7 @@ export default function BookPage({ params }) {
 
         <div className="space-y-4">
           <DigitalFiles bookId={book.BookID} media={data.media} />
+          <AlsoBorrowed bookId={book.BookID} />
         </div>
       </div>
     </>

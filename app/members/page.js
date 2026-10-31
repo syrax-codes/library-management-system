@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { Badge, Card, Drawer, Field, Modal, PageHeader, Table } from '@/components/ui';
+import { MemberRecommendations } from '@/components/Recommendations';
 import { useToast } from '@/components/Toast';
 import { api, formatDate, rupees } from '@/lib/client';
 
@@ -137,7 +138,7 @@ export default function MembersPage() {
   );
 }
 
-// Side panel: profile, loans and fines (with pay / waive)
+// Side panel: profile, loans, fines (with pay / waive) and recommendations
 function MemberPanel({ memberId, onClose, onChange }) {
   const toast = useToast();
   const [data, setData] = useState(null);
@@ -237,6 +238,8 @@ function MemberPanel({ memberId, onClose, onChange }) {
               </ul>
             )}
           </div>
+
+          <MemberRecommendations memberId={memberId} compact />
         </div>
       )}
     </Drawer>
