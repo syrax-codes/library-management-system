@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { use, useCallback, useEffect, useState } from 'react';
 import { Badge, Card, PageHeader, Table } from '@/components/ui';
+import { DigitalFiles, BookReviews } from '@/components/BookExtras';
 import { useUser } from '@/components/AppShell';
 import { useToast } from '@/components/Toast';
 import { api, formatDate } from '@/lib/client';
@@ -79,22 +80,12 @@ export default function BookPage({ params }) {
           <Card title={`Copies (${book.AvailableCopies} of ${book.TotalCopies} available)`}>
             <Table columns={copyColumns} rows={copies} rowKey={(c) => c.CopyNumber} empty="No physical copies" />
           </Card>
+
+          <BookReviews bookId={book.BookID} reviews={data.reviews} onChange={load} />
         </div>
 
         <div className="space-y-4">
-          <Card title="Digital copies">
-            {data.media.length === 0 ? (
-              <p className="muted">No digital versions.</p>
-            ) : (
-              <ul className="space-y-1 text-sm">
-                {data.media.map((m) => (
-                  <li key={m.MediaNumber}>
-                    {m.FileFormat} <span className="text-stone-500">· {m.FileSizeMB} MB</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </Card>
+          <DigitalFiles bookId={book.BookID} media={data.media} />
         </div>
       </div>
     </>
