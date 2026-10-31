@@ -1,4 +1,6 @@
 import './globals.css';
+import AppShell from '@/components/AppShell';
+import { ToastProvider } from '@/components/Toast';
 
 export const metadata = {
   title: 'Library Management System',
@@ -8,7 +10,11 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <ToastProvider>
+          <AppShell>{children}</AppShell>
+        </ToastProvider>
+      </body>
     </html>
   );
 }
