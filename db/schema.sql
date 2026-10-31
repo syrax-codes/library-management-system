@@ -156,5 +156,153 @@ ALTER TABLE Loans
 
 -- ============================================================================
 -- SECTION B: Facilities, Accounts and Analytics (Alisha)
--- (added in a later patch)
+-- User_Accounts, Study_Rooms, Room_Amenities, Room_Reservations,
+-- Gate_Attendance, Digital_Media, Digital_Media_Access, Reviews
 -- ============================================================================
+
+-- Login accounts. Member accounts link to a Members row; staff accounts do not.
+CREATE TABLE User_Accounts (
+  UserID       INT AUTO_INCREMENT PRIMARY KEY,
+  Email        VARCHAR(100) NOT NULL,
+  PasswordHash CHAR(60)     NOT NULL,          -- bcrypt hash, never the password
+  Role         VARCHAR(20)  NOT NULL,
+  MemberID     INT,
+  IsActive     BOOLEAN      NOT NULL DEFAULT TRUE,
+  CreatedAt    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  LastLoginAt  DATETIME,
+  CONSTRAINT uq_account_email  UNIQUE (Email),
+  CONSTRAINT uq_account_member UNIQUE (MemberID),
+  CONSTRAINT chk_account_role  CHECK (Role IN ('Admin', 'Librarian', 'Member'))
+);
+
+CREATE TABLE Study_Rooms (
+  RoomID   INT AUTO_INCREMENT PRIMARY KEY,
+  RoomName VARCHAR(50) NOT NULL,
+  Capacity INT         NOT NULL,
+  Floor    VARCHAR(10),
+  Wing     VARCHAR(10),
+  CONSTRAINT uq_room_name UNIQUE (RoomName),
+  CONSTRAINT chk_room_capacity CHECK (Capacity > 0)
+);
+
+-- v2: replaces the comma-separated Study_Rooms.Amenities column (1NF fix)
+CREATE TABLE Room_Amenities (
+  RoomID  INT         NOT NULL,
+  Amenity VARCHAR(50) NOT NULL,
+  PRIMARY KEY (RoomID, Amenity)
+);
+
+CREATE TABLE Room_Reservations (
+  ReservationID   INT AUTO_INCREMENT PRIMARY KEY,
+  MemberID        INT         NOT NULL,
+  RoomID          INT         NOT NULL,
+  ReservationDate DATE        NOT NULL,
+  StartTime       TIME        NOT NULL,
+  EndTime         TIME        NOT NULL,
+  BookingStatus   VARCHAR(20) NOT NULL DEFAULT 'Confirmed',
+  CONSTRAINT chk_booking_status CHECK (BookingStatus IN ('Confirmed', 'Cancelled', 'Completed'))
+);
+
+-- StayMinutes is the ER diagram's derived attribute, computed by MySQL
+CREATE TABLE Gate_Attendance (
+  LogID       INT AUTO_INCREMENT PRIMARY KEY,
+  MemberID    INT      NOT NULL,
+  EntryTime   DATETIME NOT NULL,
+  ExitTime    DATETIME,
+  StayMinutes INT GENERATED ALWAYS AS (TIMESTAMPDIFF(MINUTE, EntryTime, ExitTime)) STORED
+);
+
+-- Weak entity: identified by its book plus a media number
+CREATE TABLE Digital_Media (
+  BookID      INT           NOT NULL,
+  MediaNumber INT           NOT NULL,
+  FileFormat  VARCHAR(20)   NOT NULL,
+  FileSizeMB  DECIMAL(10, 2),
+  AccessURL   VARCHAR(255),
+  PRIMARY KEY (BookID, MediaNumber),
+  CONSTRAINT chk_media_format CHECK (FileFormat IN ('PDF', 'EPUB', 'Audiobook'))
+);
+
+-- v2: AccessDate + AccessTime merged into AccessTimestamp so the key is unique
+CREATE TABLE Digital_Media_Access (
+  MemberID        INT      NOT NULL,
+  BookID          INT      NOT NULL,
+  MediaNumber     INT      NOT NULL,
+  AccessTimestamp DATETIME NOT NULL,
+  DeviceType      VARCHAR(30),
+  PRIMARY KEY (MemberID, BookID, MediaNumber, AccessTimestamp)
+);
+
+CREATE TABLE Reviews (
+  ReviewID            INT AUTO_INCREMENT PRIMARY KEY,
+  MemberID            INT       NOT NULL,
+  BookID              INT       NOT NULL,
+  StarRating          INT       NOT NULL,
+  ReviewText          TEXT,
+  SubmissionTimestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT uq_review_member_book UNIQUE (MemberID, BookID),
+  CONSTRAINT chk_star_rating CHECK (StarRating BETWEEN 1 AND 5)
+);
+
+-- ---- ALTER: foreign keys -----------------------------------------------------
+
+ALTER TABLE User_Accounts
+  ADD CONSTRAINT fk_account_member FOREIGN KEY (MemberID)
+    REFERENCES Members (MemberID) ON DELETE RESTRICT;
+
+ALTER TABLE Room_Amenities
+  ADD CONSTRAINT fk_amenity_room FOREIGN KEY (RoomID)
+    REFERENCES Study_Rooms (RoomID) ON DELETE CASCADE;
+
+ALTER TABLE Room_Reservations
+  ADD CONSTRAINT fk_reservation_member FOREIGN KEY (MemberID)
+    REFERENCES Members (MemberID) ON DELETE RESTRICT,
+  ADD CONSTRAINT fk_reservation_room FOREIGN KEY (RoomID)
+    REFERENCES Study_Rooms (RoomID) ON DELETE RESTRICT;
+
+ALTER TABLE Gate_Attendance
+  ADD CONSTRAINT fk_gate_member FOREIGN KEY (MemberID)
+    REFERENCES Members (MemberID) ON DELETE RESTRICT;
+
+ALTER TABLE Digital_Media
+  ADD CONSTRAINT fk_media_book FOREIGN KEY (BookID)
+    REFERENCES Books (BookID) ON DELETE CASCADE;
+
+ALTER TABLE Digital_Media_Access
+  ADD CONSTRAINT fk_access_member FOREIGN KEY (MemberID)
+    REFERENCES Members (MemberID) ON DELETE RESTRICT,
+  ADD CONSTRAINT fk_access_media FOREIGN KEY (BookID, MediaNumber)
+    REFERENCES Digital_Media (BookID, MediaNumber) ON DELETE RESTRICT;
+
+ALTER TABLE Reviews
+  ADD CONSTRAINT fk_review_member FOREIGN KEY (MemberID)
+    REFERENCES Members (MemberID) ON DELETE CASCADE,
+  ADD CONSTRAINT fk_review_book FOREIGN KEY (BookID)
+    REFERENCES Books (BookID) ON DELETE CASCADE;
+
+-- ---- ALTER: CHECKs ---------------------------------------------------------------
+
+-- A Member account must point at a member; staff accounts must not
+ALTER TABLE User_Accounts
+  ADD CONSTRAINT chk_account_member_link CHECK (
+    (Role = 'Member' AND MemberID IS NOT NULL) OR
+    (Role IN ('Admin', 'Librarian') AND MemberID IS NULL)
+  ),
+  ADD CONSTRAINT chk_account_email
+    CHECK (Email REGEXP '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+[.][A-Za-z]{2,}$');
+
+ALTER TABLE Room_Reservations
+  ADD CONSTRAINT chk_reservation_time CHECK (EndTime > StartTime);
+
+ALTER TABLE Gate_Attendance
+  ADD CONSTRAINT chk_gate_exit CHECK (ExitTime IS NULL OR ExitTime > EntryTime);
+
+-- ---- ALTER: indexes ------------------------------------------------------------
+
+-- Overlap check in sp_ReserveRoom and the bookings-for-a-date list
+ALTER TABLE Room_Reservations
+  ADD INDEX idx_reservations_room_date (RoomID, ReservationDate);
+
+-- A member's visit history
+ALTER TABLE Gate_Attendance
+  ADD INDEX idx_gate_member_entry (MemberID, EntryTime);
