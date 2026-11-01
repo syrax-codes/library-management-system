@@ -61,14 +61,14 @@ export default function MyLibraryPage() {
             rowKey={(l) => l.LoanID}
             empty="No books on loan"
             columns={[
-              { key: 'Title', label: 'Book', render: (l) => <Link href={`/catalog/${l.BookID}`} className="text-teal-800 hover:underline">{l.Title}</Link> },
+              { key: 'Title', label: 'Book', render: (l) => <Link href={`/catalog/${l.BookID}`} className="text-brand-800 hover:underline">{l.Title}</Link> },
               { key: 'DueDate', label: 'Due', render: (l) => formatDate(l.DueDate) },
               { key: 'DaysOverdue', label: '', render: (l) => (l.DaysOverdue > 0 ? <Badge tone="red">{l.DaysOverdue} day{l.DaysOverdue === 1 ? '' : 's'} late</Badge> : null) },
             ]}
           />
         </Card>
 
-        <Card title="My study room bookings" action={<Link href="/rooms" className="text-xs text-teal-800 hover:underline">Book a room</Link>}>
+        <Card title="My study room bookings" action={<Link href="/rooms" className="text-xs text-brand-800 hover:underline">Book a room</Link>}>
           <Table
             rows={bookings}
             rowKey={(b) => b.ReservationID}
@@ -117,7 +117,7 @@ export default function MyLibraryPage() {
             rowKey={(l) => l.LoanID}
             empty="Nothing returned yet"
             columns={[
-              { key: 'Title', label: 'Book', render: (l) => <Link href={`/catalog/${l.BookID}`} className="text-teal-800 hover:underline">{l.Title}</Link> },
+              { key: 'Title', label: 'Book', render: (l) => <Link href={`/catalog/${l.BookID}`} className="text-brand-800 hover:underline">{l.Title}</Link> },
               { key: 'ActualReturnDate', label: 'Returned', render: (l) => formatDate(l.ActualReturnDate) },
               { key: 'DaysLate', label: '', render: (l) => (l.DaysLate > 0 ? <Badge tone="amber">{l.DaysLate} day{l.DaysLate === 1 ? '' : 's'} late</Badge> : null) },
             ]}

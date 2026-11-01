@@ -12,7 +12,7 @@ function Offline({ message }) {
 
 function BookLink({ book }) {
   return (
-    <Link href={`/catalog/${book.BookID}`} className="text-teal-800 hover:underline">
+    <Link href={`/catalog/${book.BookID}`} className="text-brand-800 hover:underline">
       {book.Title}
     </Link>
   );

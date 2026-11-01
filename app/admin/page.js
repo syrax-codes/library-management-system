@@ -104,7 +104,7 @@ export default function AdminPage() {
             rowKey={(b) => b.BookID}
             empty="Every book has been borrowed recently"
             columns={[
-              { key: 'Title', label: 'Book', render: (b) => <Link href={`/catalog/${b.BookID}`} className="text-teal-800 hover:underline">{b.Title}</Link> },
+              { key: 'Title', label: 'Book', render: (b) => <Link href={`/catalog/${b.BookID}`} className="text-brand-800 hover:underline">{b.Title}</Link> },
               { key: 'Genres', label: 'Genres' },
               { key: 'TotalCopies', label: 'Copies' },
             ]}

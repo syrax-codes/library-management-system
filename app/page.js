@@ -39,7 +39,7 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <Card title="Overdue loans" action={<Link href="/loans" className="text-xs text-teal-800 hover:underline">Go to loans</Link>}>
+        <Card title="Overdue loans" action={<Link href="/loans" className="text-xs text-brand-800 hover:underline">Go to loans</Link>}>
           <Table
             rows={stats.overdue}
             rowKey={(l) => l.LoanID}

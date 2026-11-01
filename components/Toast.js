@@ -23,7 +23,7 @@ export function ToastProvider({ children }) {
             key={t.id}
             role="status"
             className={`rounded-md border px-4 py-3 text-sm shadow-sm ${
-              t.type === 'error' ? 'border-red-200 bg-red-50 text-red-800' : 'border-teal-200 bg-white text-stone-800'
+              t.type === 'error' ? 'border-red-200 bg-red-50 text-red-800' : 'border-brand-200 bg-white text-stone-800'
             }`}
           >
             {t.message}

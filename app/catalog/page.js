@@ -36,7 +36,7 @@ export default function CatalogPage() {
       key: 'Title',
       label: 'Title',
       render: (b) => (
-        <Link href={`/catalog/${b.BookID}`} className="font-medium text-teal-800 hover:underline">
+        <Link href={`/catalog/${b.BookID}`} className="font-medium text-brand-800 hover:underline">
           {b.Title}
         </Link>
       ),

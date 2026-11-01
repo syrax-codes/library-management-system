@@ -49,10 +49,10 @@ export default function AppShell({ children }) {
   return (
     <UserContext.Provider value={user}>
       <div className="flex min-h-screen">
-        <aside className="hidden w-56 shrink-0 border-r border-stone-200 bg-white md:block">
-          <div className="border-b border-stone-200 px-5 py-4">
-            <div className="text-sm font-semibold text-stone-900">Library</div>
-            <div className="text-xs text-stone-500">Management System</div>
+        <aside className="hidden w-56 shrink-0 bg-brand-800 md:block">
+          <div className="border-b border-white/10 px-5 py-4">
+            <div className="text-sm font-semibold text-white">Library</div>
+            <div className="text-xs text-brand-200">Management System</div>
           </div>
           <nav className="flex flex-col gap-0.5 p-3">
             {links.map((item) => (
@@ -60,7 +60,7 @@ export default function AppShell({ children }) {
                 key={item.href}
                 href={item.href}
                 className={`rounded-md px-3 py-2 text-sm ${
-                  isActive(item.href) ? 'bg-stone-100 font-medium text-stone-900' : 'text-stone-600 hover:bg-stone-50'
+                  isActive(item.href) ? 'bg-white/15 font-medium text-white' : 'text-brand-100 hover:bg-white/10'
                 }`}
               >
                 {item.label}

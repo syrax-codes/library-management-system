@@ -68,7 +68,7 @@ export default function MembersPage() {
               key: 'Name',
               label: 'Member',
               render: (m) => (
-                <button className="text-left font-medium text-teal-800 hover:underline" onClick={() => setSelected(m.MemberID)}>
+                <button className="text-left font-medium text-brand-800 hover:underline" onClick={() => setSelected(m.MemberID)}>
                   {m.Name}
                   <span className="block text-xs font-normal text-stone-500">{m.EmailAddress}</span>
                 </button>
