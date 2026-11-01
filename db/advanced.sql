@@ -20,8 +20,8 @@ USE library;
 
 DROP VIEW IF EXISTS vw_ActiveLoans;
 -- Every unreturned loan. Overdue loans are the rows with DaysOverdue > 0.
--- This view replaces the old Physical_Copy.HeldByMemberID column: the current
--- holder of a copy is derived from Loans instead of being stored twice.
+-- The current holder of a copy is derived from Loans here instead of being
+-- stored a second time in Physical_Copy.
 CREATE VIEW vw_ActiveLoans AS
 SELECT l.LoanID,
        l.MemberID,

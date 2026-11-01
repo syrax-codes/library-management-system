@@ -1,6 +1,6 @@
 -- ============================================================================
 -- Library Management System - seed.sql
--- Demo data for database v2. Run after schema.sql and advanced.sql.
+-- Demo data. Run after schema.sql and advanced.sql.
 --
 -- Loans are NOT inserted directly: they go through sp_CheckoutBook, and
 -- returns are plain UPDATEs that fire trg_BookReturned. So every copy status

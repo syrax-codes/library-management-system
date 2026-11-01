@@ -85,7 +85,7 @@ Useful demo members: **Aditya Joshi** has 3 active loans (loan limit), **Rahul D
 
 | Object | Purpose |
 | --- | --- |
-| `vw_ActiveLoans` | Unreturned loans with days overdue; replaces the old `HeldByMemberID` column |
+| `vw_ActiveLoans` | Unreturned loans with days overdue; also tells who currently holds each copy |
 | `vw_BookCatalog` | Each book with genres, copy counts, formats and average rating |
 | `fn_GetMemberTotalFines` | A member's total pending fines |
 | `sp_CheckoutBook` | Locks the copy row (`FOR UPDATE`), checks availability, loan limit and fines, inserts the loan |

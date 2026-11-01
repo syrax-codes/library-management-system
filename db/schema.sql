@@ -1,5 +1,5 @@
 -- ============================================================================
--- Library Management System - schema.sql (database v2)
+-- Library Management System - schema.sql
 -- Builds all 15 tables from scratch.
 -- Run order: schema.sql -> advanced.sql -> seed.sql   (or: npm run db:setup)
 --
@@ -185,7 +185,7 @@ CREATE TABLE Study_Rooms (
   CONSTRAINT chk_room_capacity CHECK (Capacity > 0)
 );
 
--- v2: replaces the comma-separated Study_Rooms.Amenities column (1NF fix)
+-- Multi-valued attribute: one row per amenity, so every value is atomic (1NF)
 CREATE TABLE Room_Amenities (
   RoomID  INT         NOT NULL,
   Amenity VARCHAR(50) NOT NULL,
@@ -223,7 +223,7 @@ CREATE TABLE Digital_Media (
   CONSTRAINT chk_media_format CHECK (FileFormat IN ('PDF', 'EPUB', 'Audiobook'))
 );
 
--- v2: AccessDate + AccessTime merged into AccessTimestamp so the key is unique
+-- AccessTimestamp holds date and time, so every access has a unique key
 CREATE TABLE Digital_Media_Access (
   MemberID        INT      NOT NULL,
   BookID          INT      NOT NULL,

@@ -20,7 +20,7 @@ export async function GET(request, { params }) {
     );
     if (!book) return fail('Book not found', 404);
 
-    // Current holder comes from vw_ActiveLoans (no HeldByMemberID column)
+    // Current holder of each copy comes from vw_ActiveLoans
     const copies = await query(
       `SELECT p.CopyNumber, p.Floor, p.Aisle, p.ShelfNumber, p.AcquisitionDate, p.AvailabilityStatus,
               a.LoanID, a.MemberID AS HolderID, a.MemberName AS HolderName, a.DueDate
